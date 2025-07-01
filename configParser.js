@@ -1,5 +1,5 @@
 const yaml = require('js-yaml');
-const tokenManager = require('./tokenManager');
+const tokenManager = require('./TokenManager');
 
 class ConfigParser {
     constructor(configPath) {
@@ -21,9 +21,9 @@ class ConfigParser {
 
             this.config = parsedConfig.api_config;
             this.phases = {
-                init: [],
+                initialize: [],
                 action: [], // Default phase
-                end: []
+                finalize: []
             };
 
             this.parseConfig();
