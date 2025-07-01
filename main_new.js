@@ -1,35 +1,37 @@
-const RequestBuilder = require('./requestBuilder');
-const ConfigParser = require('./configParser');
+const RequestBuilder = require('./RequestBuilder');
+const ConfigParser = require('./ConfigParser');
 
-let config = {};
+let config = new ConfigParser('api_config.yaml');
 const requestBuilder = new RequestBuilder();
+
+function executeApiRequest(apiList){
+	
+	for(const apiConfig of apiList) {
+	    const request = requestBuilder.build(apiConfig);
+	    const txn = new load.Transaction(apiConfig.name);
+	    txn.start();
+	    const response = request.sendSync();
+	    txn.stop();
+	}
+}
 
 load.initialize('Initialize', async function() {
 
-	config = new ConfigParser('api_config.yaml');
-	const initApis = config.getApisByPhase('init');
+	const apis = config.getApisByPhase(load.config.stage);
+	executeApiRequest(apis);
 
-	for(const apiConfig of initApis) {
-	    const request = requestBuilder.build(apiConfig);
-        load.log(request);
-	    const response = request.sendSync();
-
-	}
 });
 
 load.action('Action', async function() {
-	const actionApis = config.getApisByPhase('action');
 
-	for(const apiConfig of actionApis) {
-	    const request = requestBuilder.build(apiConfig);
-	    const response = request.sendSync();
-	}
-
-	load.log(actionApis);
+	const apis = config.getApisByPhase(load.config.stage);
+	executeApiRequest(apis);
+	
 });
 
 load.finalize('Finalize', async function() {
 
-	const finalApis = config.getApisByPhase('end');
-    	load.log(finalApis);
+	const apis = config.getApisByPhase(load.config.stage);
+	executeApiRequest(apis);
+
 });
